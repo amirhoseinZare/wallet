@@ -1,8 +1,10 @@
 import { Controller, Post, Body, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { TransactionDto } from './dto/transaction.dto';
-import { GetTransactionDto } from './dto/get-transaction.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { NewTransactionDto } from './dto/new-transaction.dto';
 
+@ApiTags('Transactions')
 @Controller('transactions')
 export class TransactionController {
   constructor(private readonly userService: UserService) {}
@@ -17,7 +19,7 @@ export class TransactionController {
   @Post('/money')
   async processTransaction(
     @Body() transactionDto: TransactionDto,
-  ): Promise<GetTransactionDto> {
+  ): Promise<NewTransactionDto> {
     try {
       return await this.userService.processTransaction(transactionDto);
     } catch (error) {

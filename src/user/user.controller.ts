@@ -13,6 +13,8 @@ import { User } from './user.entity';
 import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { GetUserBalanceDto } from './dto/get-balance.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserTransactionResponseDto } from 'src/transaction/dto/transaction-response.dto';
+import { GetUserTransactionsQueryDto } from 'src/transaction/dto/get-user-transactions-query.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -79,5 +81,28 @@ export class UserController {
 
     // Call the service method with the ID and fields
     return this.userService.getUserById(id, fieldsArray);
+  }
+
+  /**
+   * Gets a list of transactions for a specified user with pagination.
+   *
+   * @param userId - The ID of the user whose transactions are to be retrieved.
+   * @param pagination - Pagination parameters including page and limit.
+   * @returns A paginated list of transactions for the user.
+   */
+  @Get('transactions/:userId')
+  @ApiQuery({
+    name: 'page',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    example: 10,
+  })
+  async getUserTransactions(
+    @Param('userId') userId: number,
+    @Query() pagination: GetUserTransactionsQueryDto,
+  ): Promise<UserTransactionResponseDto> {
+    return this.userService.getUserTransactions(userId, pagination);
   }
 }

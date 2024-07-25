@@ -8,8 +8,10 @@ import { GetUserBalanceDto } from './dto/get-balance.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { TransactionDto } from 'src/transaction/dto/transaction.dto';
 import { Transaction } from 'src/transaction/transaction.entity';
-import { GetTransactionDto } from 'src/transaction/dto/get-transaction.dto';
 import Decimal from 'decimal.js';
+import { UserTransactionResponseDto } from 'src/transaction/dto/transaction-response.dto';
+import { GetUserTransactionsQueryDto } from 'src/transaction/dto/get-user-transactions-query.dto';
+import { NewTransactionDto } from 'src/transaction/dto/new-transaction.dto';
 
 @Injectable()
 export class UserService {
@@ -19,6 +21,7 @@ export class UserService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
   ) {}
+
   /**
    * Creates a new user with the provided username and email.
    *
@@ -108,7 +111,7 @@ export class UserService {
    */
   async processTransaction(
     transactionDto: TransactionDto,
-  ): Promise<GetTransactionDto> {
+  ): Promise<NewTransactionDto> {
     const { userId, amount } = transactionDto;
 
     // Find the user
@@ -139,5 +142,46 @@ export class UserService {
 
     // Return the reference ID of the transaction
     return { referenceId: savedTransaction.id };
+  }
+
+  /**
+   * Retrieves a list of transactions for a specified user with pagination.
+   *
+   * @param userId - The ID of the user whose transactions are to be retrieved.
+   * @param pagination - Pagination parameters including page and limit.
+   * @returns A paginated list of transactions for the user.
+   * @throws NotFoundException if the user with the specified ID is not found.
+   */
+  async getUserTransactions(
+    userId: number,
+    pagination: GetUserTransactionsQueryDto,
+  ): Promise<UserTransactionResponseDto> {
+    // Check if user exists
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { page, limit } = pagination;
+
+    const skip = (page - 1) * limit;
+
+    // Query for transactions with pagination
+    const [transactions, total] = await this.transactionRepository.findAndCount(
+      {
+        select: {
+          id: true,
+          amount: true,
+          createdAt: true,
+          user: {},
+        },
+        where: { user },
+        skip,
+        take: limit,
+        order: { createdAt: 'DESC' }, // Order by date descending
+      },
+    );
+
+    return { transactions, total };
   }
 }
