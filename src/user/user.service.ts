@@ -24,7 +24,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-  ) { }
+  ) {}
 
   /**
    * Creates a new user with the provided username and email.
