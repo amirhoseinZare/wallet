@@ -4,6 +4,8 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { TransactionModule } from './transaction/transaction.module';
 import { AppController } from './app.controller';
+import { DailyTotalModule } from './daily-total/daily-total.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { AppController } from './app.controller';
     UserModule,
     DatabaseModule,
     TransactionModule,
+    DailyTotalModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
 })
