@@ -14,7 +14,7 @@ import {
   UserTransactionResponseDto,
 } from 'src/transaction/dto/transaction-response.dto';
 import { GetUserTransactionsQueryDto } from 'src/transaction/dto/get-user-transactions-query.dto';
-import { NewTransactionDto } from 'src/transaction/dto/new-transaction.dto';
+import { NewTransactionDto } from 'src/transaction/dto/get-transaction.dto';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()

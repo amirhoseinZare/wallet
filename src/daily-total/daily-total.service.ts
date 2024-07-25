@@ -16,9 +16,11 @@ export class DailyTotalService {
     private readonly dailyTotalRepository: Repository<DailyTotal>,
   ) {}
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async calculateDailyTotals() {
     this.logger.verbose('Daily Transaction Calculations started');
+
+    // Set the time range for yesterday
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(0, 0, 0, 0);
@@ -26,22 +28,25 @@ export class DailyTotalService {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const transactions = await this.transactionRepository
+    // Perform an aggregate query to sum the amounts of transactions
+    const result = await this.transactionRepository
       .createQueryBuilder('transaction')
+      .select('SUM(transaction.amount)', 'total')
       .where('transaction.createdAt >= :yesterday', { yesterday })
       .andWhere('transaction.createdAt < :today', { today })
-      .getMany();
+      .getRawOne();
 
-    const total = transactions.reduce(
-      (sum, transaction) => sum.plus(new Decimal(transaction.amount)),
-      new Decimal(0),
-    );
+    // Get the total amount from the result, default to 0 if no transactions found
+    const totalAmount = result?.total
+      ? new Decimal(result.total).toNumber()
+      : 0;
 
+    // Create and save the daily total
     const dailyTotal = new DailyTotal();
     dailyTotal.date = yesterday;
-    dailyTotal.totalAmount = total.toNumber();
+    dailyTotal.totalAmount = totalAmount;
 
     await this.dailyTotalRepository.save(dailyTotal);
-    this.logger.verbose('Daily Transaction Calculations finished successfullt');
+    this.logger.verbose('Daily Transaction Calculations finished successfully');
   }
 }

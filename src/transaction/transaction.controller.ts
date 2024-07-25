@@ -2,12 +2,12 @@ import { Controller, Post, Body, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { TransactionDto } from './dto/transaction.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { NewTransactionDto } from './dto/new-transaction.dto';
+import { NewTransactionDto } from './dto/get-transaction.dto';
 
 @ApiTags('Transactions')
 @Controller('transactions')
 export class TransactionController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   /**
    * Processes a transaction to add or subtract money from a user's wallet.
