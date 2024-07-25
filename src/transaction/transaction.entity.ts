@@ -9,7 +9,7 @@ export class Transaction {
   @Column({
     type: 'numeric',
     precision: 1000,
-    scale: 2,
+    scale: 0,
   })
   amount: number;
 

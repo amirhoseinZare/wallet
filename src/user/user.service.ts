@@ -9,9 +9,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { TransactionDto } from 'src/transaction/dto/transaction.dto';
 import { Transaction } from 'src/transaction/transaction.entity';
 import Decimal from 'decimal.js';
-import { UserTransactionResponseDto } from 'src/transaction/dto/transaction-response.dto';
+import {
+  TransactionResponseDto,
+  UserTransactionResponseDto,
+} from 'src/transaction/dto/transaction-response.dto';
 import { GetUserTransactionsQueryDto } from 'src/transaction/dto/get-user-transactions-query.dto';
 import { NewTransactionDto } from 'src/transaction/dto/new-transaction.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UserService {
@@ -20,7 +24,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
-  ) {}
+  ) { }
 
   /**
    * Creates a new user with the provided username and email.
@@ -98,8 +102,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    return { balance: user.balance };
+    return plainToInstance(GetUserBalanceDto, { balance: user.balance });
   }
 
   /**
@@ -182,6 +185,10 @@ export class UserService {
       },
     );
 
-    return { transactions, total };
+    const transactionDtos = transactions.map((transaction) =>
+      plainToInstance(TransactionResponseDto, transaction),
+    );
+
+    return { transactions: transactionDtos, total };
   }
 }

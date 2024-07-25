@@ -15,7 +15,7 @@ export class User {
   @Column({
     type: 'numeric',
     precision: 1000,
-    scale: 2,
+    scale: 0,
     default: 0,
   })
   balance: number;
