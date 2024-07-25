@@ -21,7 +21,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document); // Changed path to 'api-docs' for better clarity
+  SwaggerModule.setup('api-docs', app, document);
 
   // Initialize logger
   const logger = new Logger('ProjectStartup');

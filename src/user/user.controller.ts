@@ -6,10 +6,15 @@ import {
   Param,
   Query,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { GetUserBalanceDto } from './dto/get-balance.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
+@ApiTags('Users')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -17,25 +22,39 @@ export class UserController {
   /**
    * Creates a new user with the provided username and email.
    *
-   * @param createUserDto - Data transfer object containing username and email of the new user.
+   * @param createUserDto - The DTO containing the username and email for the new user.
    * @returns The created user entity.
    * @throws ConflictException if the email or username is already in use.
    */
   @Post()
-  async createUser(
-    @Body() createUserDto: { username: string; email: string },
-  ): Promise<User> {
-    const { username, email } = createUserDto;
-
+  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     try {
-      // Call the service method to create a new user
-      return await this.userService.createUser(username, email);
+      return await this.userService.createUser(createUserDto);
     } catch (error) {
-      // Handle known errors, e.g., ConflictException
       if (error instanceof ConflictException) {
         throw new ConflictException(error.message);
       }
-      // Rethrow unexpected errors
+      throw error;
+    }
+  }
+
+  /**
+   * Retrieves the balance of a user by their ID.
+   *
+   * @param userId - The ID of the user to retrieve the balance for.
+   * @returns A JSON object containing the user's balance.
+   * @throws NotFoundException if no user with the specified ID is found.
+   */
+  @Get('/balance/:userId')
+  async getBalance(
+    @Param('userId') userId: number,
+  ): Promise<GetUserBalanceDto> {
+    try {
+      return await this.userService.getBalanceById(userId);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
       throw error;
     }
   }
@@ -47,9 +66,10 @@ export class UserController {
    * @param fields - A query parameter specifying which fields to include in the response.
    * @returns The user entity with the specified fields.
    */
-  @Get(':id')
+  @Get('details/:userId')
+  @ApiQuery({ name: 'fields', required: false })
   async getUserById(
-    @Param('id') id: number,
+    @Param('userId') id: number,
     @Query('fields') fields?: string, // Comma-separated list of fields
   ): Promise<Partial<User>> {
     // Parse the fields query parameter into an array of strings

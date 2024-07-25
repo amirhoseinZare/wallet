@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { SelectFields } from 'src/common/types';
+import { GetUserBalanceDto } from './dto/get-balance.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -11,7 +13,6 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-
   /**
    * Creates a new user with the provided username and email.
    *
@@ -19,12 +20,13 @@ export class UserService {
    * using an efficient count query. If an existing user is found, it throws a ConflictException.
    * If no existing user is found, it creates a new user entity and saves it to the database.
    *
-   * @param username - The username of the new user.
-   * @param email - The email address of the new user.
+   * @param createUserDto - The DTO containing username and email of the new user.
    * @returns The created user entity.
    * @throws ConflictException if the email or username is already in use.
    */
-  async createUser(username: string, email: string): Promise<User> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    const { username, email } = createUserDto;
+
     // Using count query for the most efficient existence checking
     const existingUserCount = await this.userRepository.count({
       where: [{ email }, { username }],
@@ -69,5 +71,25 @@ export class UserService {
 
     // Return the found user entity with the specified fields
     return user as SelectFields<User, T>;
+  }
+
+  /**
+   * Retrieves the balance of a user by their ID.
+   *
+   * @param id - The ID of the user to retrieve.
+   * @returns An object containing the user's balance.
+   * @throws NotFoundException if no user with the specified ID is found in the database.
+   */
+  async getBalanceById(id: number): Promise<GetUserBalanceDto> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: ['balance'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return { balance: user.balance };
   }
 }
