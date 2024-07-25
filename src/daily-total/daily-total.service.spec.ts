@@ -1,14 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { DailyTotalService } from './daily-total.service';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Transaction } from '../transaction/transaction.entity';
 import { DailyTotal } from './daily-total.entity';
+import { Repository } from 'typeorm';
+import { Logger } from '@nestjs/common';
+import Decimal from 'decimal.js';
+
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
+
+const createMockRepository = <T = any>(): MockRepository<T> => ({
+  createQueryBuilder: jest.fn().mockReturnValue({
+    select: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    getRawOne: jest.fn(),
+  }),
+  save: jest.fn(),
+});
 
 describe('DailyTotalService', () => {
   let service: DailyTotalService;
-  let transactionRepository: Repository<Transaction>;
-  let dailyTotalRepository: Repository<DailyTotal>;
+  let transactionRepository: MockRepository;
+  let dailyTotalRepository: MockRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,87 +30,84 @@ describe('DailyTotalService', () => {
         DailyTotalService,
         {
           provide: getRepositoryToken(Transaction),
-          useClass: Repository,
+          useValue: createMockRepository(),
         },
         {
           provide: getRepositoryToken(DailyTotal),
-          useClass: Repository,
+          useValue: createMockRepository(),
+        },
+        {
+          provide: Logger,
+          useValue: {
+            verbose: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<DailyTotalService>(DailyTotalService);
-    transactionRepository = module.get<Repository<Transaction>>(
+    transactionRepository = module.get<MockRepository>(
       getRepositoryToken(Transaction),
     );
-    dailyTotalRepository = module.get<Repository<DailyTotal>>(
+    dailyTotalRepository = module.get<MockRepository>(
       getRepositoryToken(DailyTotal),
     );
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('calculateDailyTotals', () => {
-    it('should calculate and save daily totals correctly', async () => {
-      const mockTransactions = [
-        {
-          id: 1,
-          amount: '100',
-          createdAt: new Date('2023-07-24T00:00:00Z'),
-          user: {},
-        },
-        {
-          id: 2,
-          amount: '200',
-          createdAt: new Date('2023-07-24T12:00:00Z'),
-          user: {},
-        },
-        {
-          id: 3,
-          amount: '-50',
-          createdAt: new Date('2023-07-24T23:59:59Z'),
-          user: {},
-        },
-      ];
-
-      jest.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue({
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockTransactions),
-      } as any);
+    it('should calculate and save daily totals successfully', async () => {
+      const mockResult = { total: '100.00' };
+      transactionRepository
+        .createQueryBuilder()
+        .getRawOne.mockResolvedValue(mockResult);
 
       const saveSpy = jest
         .spyOn(dailyTotalRepository, 'save')
-        .mockResolvedValue({} as DailyTotal);
+        .mockResolvedValue(null);
 
       await service.calculateDailyTotals();
 
+      expect(transactionRepository.createQueryBuilder).toHaveBeenCalled();
+      expect(
+        transactionRepository.createQueryBuilder().select,
+      ).toHaveBeenCalledWith('SUM(transaction.amount)', 'total');
+      expect(
+        transactionRepository.createQueryBuilder().where,
+      ).toHaveBeenCalled();
+      expect(
+        transactionRepository.createQueryBuilder().andWhere,
+      ).toHaveBeenCalled();
+      expect(
+        transactionRepository.createQueryBuilder().getRawOne,
+      ).toHaveBeenCalled();
+
+      const expectedTotalAmount = new Decimal(mockResult.total).toNumber();
+      const expectedDailyTotal = {
+        date: expect.any(Date),
+        totalAmount: expectedTotalAmount,
+      };
+
       expect(saveSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          totalAmount: 250.25,
-        }),
+        expect.objectContaining(expectedDailyTotal),
       );
     });
 
-    it('should handle no transactions for the day', async () => {
-      jest.spyOn(transactionRepository, 'createQueryBuilder').mockReturnValue({
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([]),
-      } as any);
+    it('should handle no transactions gracefully', async () => {
+      transactionRepository
+        .createQueryBuilder()
+        .getRawOne.mockResolvedValue(null);
 
       const saveSpy = jest
         .spyOn(dailyTotalRepository, 'save')
-        .mockResolvedValue({} as DailyTotal);
+        .mockResolvedValue(null);
 
       await service.calculateDailyTotals();
 
+      expect(
+        transactionRepository.createQueryBuilder().getRawOne,
+      ).toHaveBeenCalled();
       expect(saveSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          totalAmount: 0,
-        }),
+        expect.objectContaining({ totalAmount: 0 }),
       );
     });
   });
