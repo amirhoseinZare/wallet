@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  ConflictException,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 
@@ -6,14 +14,30 @@ import { User } from './user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  /**
+   * Creates a new user with the provided username and email.
+   *
+   * @param createUserDto - Data transfer object containing username and email of the new user.
+   * @returns The created user entity.
+   * @throws ConflictException if the email or username is already in use.
+   */
   @Post()
   async createUser(
     @Body() createUserDto: { username: string; email: string },
   ): Promise<User> {
-    return this.userService.createUser(
-      createUserDto.username,
-      createUserDto.email,
-    );
+    const { username, email } = createUserDto;
+
+    try {
+      // Call the service method to create a new user
+      return await this.userService.createUser(username, email);
+    } catch (error) {
+      // Handle known errors, e.g., ConflictException
+      if (error instanceof ConflictException) {
+        throw new ConflictException(error.message);
+      }
+      // Rethrow unexpected errors
+      throw error;
+    }
   }
 
   /**

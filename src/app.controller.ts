@@ -1,12 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, Redirect } from '@nestjs/common';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor() {}
 
+  /**
+   * Redirects from the root URL to the Swagger documentation.
+   *
+   * @returns A redirect response to the Swagger documentation URL.
+   */
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @Redirect('/api-docs', 302)
+  getHello(): void {
+    // No need to include any logic here, the @Redirect decorator handles it.
   }
 }
