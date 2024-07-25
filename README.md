@@ -65,6 +65,7 @@ cd <wallet>
 ```
 
 ## Project Structure
+```
 ├── Dockerfile
 ├── README.md
 ├── docker-compose.yml
@@ -113,6 +114,7 @@ cd <wallet>
 │ └── jest-e2e.json
 ├── tsconfig.build.json
 └── tsconfig.json
+```
 
 ## Environment Variables
 
