@@ -9,6 +9,11 @@ import { Transaction } from 'src/transaction/transaction.entity';
   imports: [
     TypeOrmModule.forRootAsync({
       useFactory: async (configService: ConfigService) => {
+        console.log(
+          configService.get<string>(EnvVariables.DB_HOST),
+          +configService.get<number>(EnvVariables.DB_PORT),
+          configService.get<string>(EnvVariables.DB_NAME),
+        );
         return {
           type: 'postgres',
           host: configService.get<string>(EnvVariables.DB_HOST),
