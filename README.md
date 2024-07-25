@@ -1,73 +1,131 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Daal Wallet Microservice
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Overview
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project is a wallet microservice built using NestJS. It provides functionalities to manage user accounts, handle transactions, and track user balances. This service includes RESTful endpoints to create users, manage wallet balances, and record transactions with full logging for audit purposes. Additionally, daily transaction totals are calculated and logged.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **User Management**: Create and retrieve user information.
+- **Wallet Management**: Add or subtract money from a user's wallet.
+- **Transaction Logging**: Record all transactions with details.
+- **Daily Totals**: Calculate and log the total amount of transactions processed each day.
+- **API Documentation**: Integrated Swagger for API documentation.
 
-## Installation
+## Prerequisites
+
+- Docker
+- Docker Compose
+
+## Getting Started
+
+### Clone the Repository
 
 ```bash
-$ npm install
+git clone <repository-url>
+cd <repository-directory>
 ```
 
-## Running the app
+## Environment Variables
+
+Create a .env file in the root directory with the following content:
+
+```.env
+APP_PORT=3333
+DB_HOST=db
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=wallet
+```
+
+Docker Setup
+Make sure Docker and Docker Compose are installed and running on your machine.
+
+Build and Run the Project
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker-compose up --build
 ```
 
-## Test
+This command will build the Docker images for the application and the PostgreSQL database, and start the containers.
+
+Accessing the Application
+Once the containers are up and running, you can access the application and the API documentation at:
+
+API Documentation: http://localhost:3333/api-docs
 
 ```bash
-# unit tests
-$ npm run test
+# Ensure you are in the container
+docker exec -it nest-docker-postgres /bin/sh
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Inside the container
+npm run test
 ```
+## Endpoints
 
-## Support
+### User Endpoints
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **Create User**
+  - **Method**: `POST`
+  - **URL**: `/users`
+  - **Input**: 
+    ```json
+    { "username": "string", "email": "string" }
+    ```
+  - **Output**: 
+    ```json
+    { "id": "number", "username": "string", "email": "string" }
+    ```
+  - **Description**: Creates a new user with the provided username and email. Throws a `ConflictException` if the email or username is already in use.
 
-## Stay in touch
+- **Get User Balance**
+  - **Method**: `GET`
+  - **URL**: `/users/balance/:userId`
+  - **Output**: 
+    ```json
+    { "balance": "number" }
+    ```
+  - **Description**: Retrieves the balance of a user by their ID. Throws a `NotFoundException` if no user with the specified ID is found.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Get User Details**
+  - **Method**: `GET`
+  - **URL**: `/users/details/:userId`
+  - **Query Params**: `fields` (optional, comma-separated list of fields to include in the response)
+  - **Output**: 
+    ```json
+    { "id": "number", "username": "string", "email": "string", ... }
+    ```
+  - **Description**: Retrieves a user by their ID with selectable fields.
 
-## License
+- **Get User Transactions**
+  - **Method**: `GET`
+  - **URL**: `/users/transactions/:userId`
+  - **Query Params**: 
+    - `page` (default: 1)
+    - `limit` (default: 10)
+  - **Output**: 
+    ```json
+    { 
+      "transactions": [
+        { "id": "number", "amount": "number", "createdAt": "date" }
+      ], 
+      "total": "number" 
+    }
+    ```
+  - **Description**: Gets a list of transactions for a specified user with pagination.
 
-Nest is [MIT licensed](LICENSE).
+### Transaction Endpoints
+
+- **Process Transaction**
+  - **Method**: `POST`
+  - **URL**: `/transactions/money`
+  - **Input**: 
+    ```json
+    { "userId": "number", "amount": "number" }
+    ```
+  - **Output**: 
+    ```json
+    { "referenceId": "number" }
+    ```
+  - **Description**: Processes a transaction to add or subtract money from a user's wallet. Throws a `NotFoundException` if the user with the specified ID is not found.

@@ -7,7 +7,7 @@ import { NewTransactionDto } from './dto/get-transaction.dto';
 @ApiTags('Transactions')
 @Controller('transactions')
 export class TransactionController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   /**
    * Processes a transaction to add or subtract money from a user's wallet.
