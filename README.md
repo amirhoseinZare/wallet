@@ -17,8 +17,9 @@ This project is a wallet microservice built using NestJS. It provides functional
 The User module handles user-related operations. It includes:
 
 - **User Creation**: Allows for the creation of new user accounts.
-- **Balance Management**: Provides endpoints to retrieve and update user balances.
-- **User Retrieval**: Fetches user details by ID and allows dynamic selection of fields.
+- **Balance**: Provides endpoints to retrieve user balances.
+- **User Retrieval**: Fetches user details by UserID and allows dynamic selection of fields.
+- **User Transactions**: Fetches user transactions by UserID and allows paginations (Sorted by Creation Time).
 
 ### Transaction Module
 
@@ -42,6 +43,8 @@ The Daily Total module calculates and logs daily transaction totals. It includes
 - **Transaction Logging**: Record all transactions with details.
 - **Daily Totals**: Calculate and log the total amount of transactions processed each day.
 - **API Documentation**: Integrated Swagger for API documentation.
+- **Containerizaions**: Containerized with Docker.
+- **Test Coverage**: 100% percent test coverage.
 
 ## Test Coverage
 
@@ -60,6 +63,56 @@ The project includes 100% test coverage to ensure that all features and function
 git clone <https://github.com/amirhoseinZare/wallet>
 cd <wallet>
 ```
+
+## Project Structure
+├── Dockerfile
+├── README.md
+├── docker-compose.yml
+├── nest-cli.json
+├── package-lock.json
+├── package.json
+├── src
+│ ├── app.controller.ts
+│ ├── app.module.ts
+│ ├── common
+│ │ └── types.ts
+│ ├── config
+│ │ ├── constants.ts
+│ │ └── env.enum.ts
+│ ├── daily-total
+│ │ ├── daily-total.entity.ts
+│ │ ├── daily-total.module.ts
+│ │ ├── daily-total.service.spec.ts
+│ │ └── daily-total.service.ts
+│ ├── database
+│ │ └── database.module.ts
+│ ├── main.ts
+│ ├── transaction
+│ │ ├── dto
+│ │ │ ├── get-transaction.dto.ts
+│ │ │ ├── get-user-transactions-query.dto.ts
+│ │ │ ├── transaction-response.dto.ts
+│ │ │ └── transaction.dto.ts
+│ │ ├── transaction.controller.spec.ts
+│ │ ├── transaction.controller.ts
+│ │ ├── transaction.entity.ts
+│ │ ├── transaction.module.ts
+│ │ └── transaction.service.spec.ts
+│ └── user
+│ ├── dto
+│ │ ├── create-user.dto.ts
+│ │ └── get-balance.dto.ts
+│ ├── user.controller.spec.ts
+│ ├── user.controller.ts
+│ ├── user.entity.ts
+│ ├── user.module.ts
+│ ├── user.service.spec.ts
+│ └── user.service.ts
+├── test
+│ ├── app.e2e-spec.ts
+│ └── jest-e2e.json
+├── tsconfig.build.json
+└── tsconfig.json
 
 ## Environment Variables
 
