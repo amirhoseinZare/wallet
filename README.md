@@ -4,6 +4,37 @@
 
 This project is a wallet microservice built using NestJS. It provides functionalities to manage user accounts, handle transactions, and track user balances. This service includes RESTful endpoints to create users, manage wallet balances, and record transactions with full logging for audit purposes. Additionally, daily transaction totals are calculated and logged.
 
+## Why PostgreSQL and TypeORM?
+
+**PostgreSQL** was chosen for its robust support for complex queries, ACID compliance, and powerful data integrity features. Its reliability and performance make it ideal for handling transactional data in a wallet service.
+
+**TypeORM** is used as the Object-Relational Mapping (ORM) tool for its seamless integration with NestJS, its support for complex database schemas, and its ability to handle database migrations easily. It simplifies database interactions and enhances productivity by allowing developers to work with TypeScript entities and repositories.
+
+## Modules
+
+### User Module
+
+The User module handles user-related operations. It includes:
+
+- **User Creation**: Allows for the creation of new user accounts.
+- **Balance Management**: Provides endpoints to retrieve and update user balances.
+- **User Retrieval**: Fetches user details by ID and allows dynamic selection of fields.
+
+### Transaction Module
+
+The Transaction module manages financial transactions within the wallet. It includes:
+
+- **Transaction Processing**: Handles the addition or deduction of funds from user wallets.
+- **Transaction Logging**: Records each transaction for auditing purposes.
+
+### Daily Total Module
+
+The Daily Total module calculates and logs daily transaction totals. It includes:
+
+- **Daily Totals Calculation**: Aggregates and sums up all transactions for a given day.
+- **Cron Job**: A scheduled job runs daily at midnight to automatically calculate and save the daily total amount. This ensures that totals are accurately computed and recorded every day without manual intervention.
+- **Logging**: Saves the daily total amounts to the database for reporting and auditing.
+
 ## Features
 
 - **User Management**: Create and retrieve user information.
@@ -11,6 +42,10 @@ This project is a wallet microservice built using NestJS. It provides functional
 - **Transaction Logging**: Record all transactions with details.
 - **Daily Totals**: Calculate and log the total amount of transactions processed each day.
 - **API Documentation**: Integrated Swagger for API documentation.
+
+## Test Coverage
+
+The project includes 100% test coverage to ensure that all features and functionalities are thoroughly tested and reliable.
 
 ## Prerequisites
 
@@ -22,8 +57,8 @@ This project is a wallet microservice built using NestJS. It provides functional
 ### Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone <https://github.com/amirhoseinZare/wallet>
+cd <wallet>
 ```
 
 ## Environment Variables
@@ -39,7 +74,7 @@ DB_PASSWORD=postgres
 DB_NAME=wallet
 ```
 
-Docker Setup
+### Docker Setup
 Make sure Docker and Docker Compose are installed and running on your machine.
 
 Build and Run the Project
@@ -129,3 +164,15 @@ npm run test
     { "referenceId": "number" }
     ```
   - **Description**: Processes a transaction to add or subtract money from a user's wallet. Throws a `NotFoundException` if the user with the specified ID is not found.
+
+## JSDoc Comments in This Project
+
+We use JSDoc comments at the beginning of every function in this project to:
+
+1. **Enhance Code Readability:** Provide clear explanations of what each function does, its parameters, return values, and exceptions.
+2. **Improve Maintainability:** Make it easier to maintain and update the code by clearly documenting its behavior.
+3. **Enable Documentation Generation:** Facilitate the automatic creation of up-to-date API documentation.
+4. **Ensure Consistent Standards:** Standardize documentation format across the codebase.
+5. **Aid Collaboration:** Help team members understand and work with the code more efficiently.
+
+JSDoc comments are key to maintaining clarity and quality in our code.
