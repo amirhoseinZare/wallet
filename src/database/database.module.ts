@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { EnvVariables } from 'src/config/env.enum';
+import { User } from 'src/user/user.entity';
+import { Transaction } from 'src/transaction/transaction.entity';
 
 @Module({
   imports: [
@@ -15,13 +17,12 @@ import { EnvVariables } from 'src/config/env.enum';
           password: configService.get<string>(EnvVariables.DB_PASSWORD),
           database: configService.get<string>(EnvVariables.DB_NAME),
           autoLoadEntities: true,
-          synchronize: true, // Set to false in production
+          synchronize: true, // MUST Set to false in production
         };
       },
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([User, Transaction]),
   ],
 })
-export class DatabaseModule {
-  //
-}
+export class DatabaseModule {}
