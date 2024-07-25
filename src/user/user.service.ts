@@ -6,12 +6,18 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import { SelectFields } from 'src/common/types';
 import { GetUserBalanceDto } from './dto/get-balance.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { TransactionDto } from 'src/transaction/dto/transaction.dto';
+import { Transaction } from 'src/transaction/transaction.entity';
+import { GetTransactionDto } from 'src/transaction/dto/get-transaction.dto';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Transaction)
+    private readonly transactionRepository: Repository<Transaction>,
   ) {}
   /**
    * Creates a new user with the provided username and email.
@@ -91,5 +97,47 @@ export class UserService {
     }
 
     return { balance: user.balance };
+  }
+
+  /**
+   * Adds or subtracts money from a user's wallet and records the transaction.
+   *
+   * @param transactionDto - The DTO containing user ID and amount to be added or deducted.
+   * @returns The reference ID of the transaction.
+   * @throws NotFoundException if the user with the specified ID is not found.
+   */
+  async processTransaction(
+    transactionDto: TransactionDto,
+  ): Promise<GetTransactionDto> {
+    const { userId, amount } = transactionDto;
+
+    // Find the user
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'balance'],
+    });
+
+    // Throw an exception if the user is not found
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Use Decimal.js to handle decimal arithmetic
+    const decimalAmount = new Decimal(amount);
+    const decimalBalance = new Decimal(user.balance);
+
+    // Update the user's balance
+    user.balance = decimalBalance.plus(decimalAmount).toNumber();
+    await this.userRepository.save(user);
+
+    // Record the transaction
+    const transaction = this.transactionRepository.create({
+      user, // Assign the user entity
+      amount: decimalAmount.toNumber(), // Set the amount
+    });
+    const savedTransaction = await this.transactionRepository.save(transaction);
+
+    // Return the reference ID of the transaction
+    return { referenceId: savedTransaction.id };
   }
 }

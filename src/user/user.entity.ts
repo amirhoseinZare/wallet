@@ -12,7 +12,12 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   email: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({
+    type: 'numeric',
+    precision: 1000,
+    scale: 2,
+    default: 0,
+  })
   balance: number;
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)

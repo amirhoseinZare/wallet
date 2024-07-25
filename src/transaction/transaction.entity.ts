@@ -6,7 +6,11 @@ export class Transaction {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int' })
+  @Column({
+    type: 'numeric',
+    precision: 1000,
+    scale: 2,
+  })
   amount: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
