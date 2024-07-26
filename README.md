@@ -64,8 +64,8 @@ We have fully integrated Swagger documentation with complete examples and detail
 ### Clone the Repository
 
 ```bash
-git clone <https://github.com/amirhoseinZare/wallet>
-cd <wallet>
+git clone https://github.com/amirhoseinZare/wallet
+cd wallet
 ```
 
 ## Project Structure
