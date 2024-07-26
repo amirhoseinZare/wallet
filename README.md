@@ -231,3 +231,7 @@ We use JSDoc comments at the beginning of every function in this project to:
 5. **Aid Collaboration:** Help team members understand and work with the code more efficiently.
 
 JSDoc comments are key to maintaining clarity and quality in our code.
+
+## Stay in touch
+
+- Author - [Amir Zare](mailto:zareamirhussein@gmail.com)
