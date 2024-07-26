@@ -50,6 +50,10 @@ The Daily Total module calculates and logs daily transaction totals. It includes
 
 The project includes 100% test coverage to ensure that all features and functionalities are thoroughly tested and reliable.
 
+## API Documentation Based on Swagger
+
+We have fully integrated Swagger documentation with complete examples and details for every endpoint, ensuring an amazing developer experience.
+
 ## Prerequisites
 
 - Docker
